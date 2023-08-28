@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Simon</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Press+Start+2P"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        text-align: center;
+        background-color: rgb(241, 177, 204);
+      }
+
+      #level-title {
+        font-family: "Press Start 2P", cursive;
+        font-size: 3rem;
+        margin: 5%;
+        color: #000000;
+      }
+
+      .container {
+        display: block;
+        width: 50%;
+        margin: auto;
+      }
+
+      .btn {
+        margin: 25px;
+        display: inline-block;
+        height: 200px;
+        width: 200px;
+        border: 10px solid black;
+        border-radius: 20%;
+      }
+
+      .game-over {
+        background-color: rgb(61, 60, 61);
+        opacity: 0.8;
+      }
+
+      .red {
+        background-color: rgb(193, 227, 242);
+      }
+
+      .green {
+        background-color: rgb(131, 233, 164);
+      }
+
+      .blue {
+        background-color: rgb(242, 115, 230);
+      }
+
+      .yellow {
+        background-color: rgb(255, 243, 89);
+      }
+
+      .pressed {
+        box-shadow: 0 0 30px white;
+        background-color: rgb(214, 214, 214);
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1 id="level-title">Press A Key to Start</h1>
+    <div class="container">
+      <div class="row">
+        <div type="button" id="green" class="btn green"></div>
+
+        <div type="button" id="red" class="btn red"></div>
+      </div>
+
+      <div class="row">
+        <div type="button" id="yellow" class="btn yellow"></div>
+        <div type="button" id="blue" class="btn blue"></div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script>
+      let gamePattern = [];
+      let userPattern = [];
+      let colors = ["red", "green", "blue", "yellow"];
+      let level = 0;
+
+      function nextSequence() {
+        let ranNum = Math.floor(Math.random() * 3) + 1;
+        let ranNumChosen = colors[ranNum];
+        gamePattern.push(ranNumChosen);
+        $("#" + ranNumChosen)
+          .fadeIn(100)
+          .fadeOut(100)
+          .fadeIn(100);
+        playSound(ranNumChosen);
+        $("h1").text("LEVEL  " + level);
+        level++;
+      }
+
+      function playSound(name) {
+        let theAudio = new Audio("sounds/" + name + ".mp3");
+        theAudio.play();
+      }
+
+      function animatePress(currentColor) {
+        $("#" + currentColor).addClass("pressed");
+        setTimeout(function () {
+          $("#" + currentColor).removeClass("pressed");
+        }, 100);
+      }
+
+      function checkAnswer(currentLevel) {
+        if (userPattern[currentLevel] === gamePattern[currentLevel]) {
+          if (userPattern.length === gamePattern.length) {
+            setTimeout(function () {
+              nextSequence();
+            }, 1100);
+            userPattern = [];
+          }
+        } else {
+          let wrongAudio = new Audio("sounds/wrong.mp3");
+          wrongAudio.play();
+          $("body").addClass("game-over");
+          setTimeout(function () {
+            $("body").removeClass("game-over");
+          }, 100);
+          restartGame();
+        }
+      }
+
+      function restartGame() {
+        gamePattern = [];
+        userPattern = [];
+        level = 0;
+        started = true;
+        $("h1").text("Press A Key To Restart");
+      }
+
+      let started = true;
+      $(document).keydown(function () {
+        if (started === true) {
+          nextSequence();
+          started = !started;
+        }
+      });
+
+      $(".btn").click(function (event) {
+        userPattern.push(this.id);
+        playSound(this.id);
+        animatePress(this.id);
+        checkAnswer(userPattern.length - 1);
+      });
+    </script>
+  </body>
+</html>
